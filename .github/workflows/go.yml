@@ -34,46 +34,43 @@ jobs:
           echo "VERSION=$VERSION" >> $GITHUB_ENV
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
-      - name: Create GitHub Tag if not exists
-        id: create_tag
-        uses: actions/github-script@v6
-        with:
-          script: |
-            const version = process.env.VERSION;
-            const tagName = `v${version}`;
-            try {
-              // Tenta buscar a referência da tag
-              await github.git.getRef({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                ref: `tags/${tagName}`
-              });
-              console.log(`Tag ${tagName} already exists.`);
-              return { tagCreated: "false" };
-            } catch (error) {
-              console.log(`Tag ${tagName} does not exist, creating...`);
-              const commitSha = context.sha;
-              // Cria o objeto de tag anotada
-              await github.git.createTag({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                tag: tagName,
-                message: `Release ${tagName}`,
-                object: commitSha,
-                type: 'commit'
-              });
-              // Cria a referência da tag
-              await github.git.createRef({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                ref: `refs/tags/${tagName}`,
-                sha: commitSha
-              });
-              console.log(`Tag ${tagName} created.`);
-              return { tagCreated: "true" };
-            }
-        env:
-          VERSION: ${{ env.VERSION }}
+          - name: Create GitHub Tag if not exists
+          id: create_tag
+          uses: actions/github-script@v6
+          with:
+            script: |
+              const version = process.env.VERSION;
+              const tagName = `v${version}`;
+              try {
+                await github.rest.git.getRef({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  ref: `tags/${tagName}`
+                });
+                console.log(`Tag ${tagName} already exists.`);
+                return { tagCreated: "false" };
+              } catch (error) {
+                console.log(`Tag ${tagName} does not exist, creating...`);
+                const commitSha = context.sha;
+                await github.rest.git.createTag({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  tag: tagName,
+                  message: `Release ${tagName}`,
+                  object: commitSha,
+                  type: 'commit'
+                });
+                await github.rest.git.createRef({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  ref: `refs/tags/${tagName}`,
+                  sha: commitSha
+                });
+                console.log(`Tag ${tagName} created.`);
+                return { tagCreated: "true" };
+              }
+          env:
+            VERSION: ${{ env.VERSION }}
 
   docker:
     runs-on: ubuntu-latest
