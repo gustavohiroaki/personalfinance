@@ -9,6 +9,7 @@ import (
 )
 
 func main() {
+	const Version = "1.0.0"
 	err := godotenv.Load(".env")
 
 	if err != nil {
