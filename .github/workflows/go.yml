@@ -37,10 +37,11 @@ jobs:
       - name: Docker tag verification
         id: tag_verification
         run: |
-          if docker manifest inspect $IMAGE:$TAG > /dev/null; then
-            echo '::set-output name=tagCreated::true';
+          TAG_EXISTS=$(curl -s -o /dev/null -w "%{http_code}" https://hub.docker.com/v2/repositories/${{ secrets.DOCKERHUB_USERNAME }}/personalfinance/tags/${{ steps.extract_version.outputs.version }})
+          if [ "$TAG_EXISTS" -eq 200 ]; then
+            echo "tagCreated=true" >> $GITHUB_OUTPUT
           else
-            echo '::set-output name=tagCreated::false';
+            echo "tagCreated=false" >> $GITHUB_OUTPUT
           fi
         env:
           IMAGE: ${{ secrets.DOCKERHUB_USERNAME }}/personalfinance
