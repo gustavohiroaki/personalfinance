@@ -10,7 +10,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     outputs:
-      tagCreated: ${{ steps.create_tag.outputs.tagCreated }}
+      tagExists: ${{ steps.create_tag.outputs.tagExists }}
       version: ${{ steps.extract_version.outputs.version }}
     steps:
       - uses: actions/checkout@v4
@@ -39,9 +39,9 @@ jobs:
         run: |
           TAG_EXISTS=$(curl -s -o /dev/null -w "%{http_code}" https://hub.docker.com/v2/repositories/${{ secrets.DOCKERHUB_USERNAME }}/personalfinance/tags/${{ steps.extract_version.outputs.version }})
           if [ "$TAG_EXISTS" -eq 200 ]; then
-            echo "tagCreated=true" >> $GITHUB_OUTPUT
+            echo "tagExists=true" >> $GITHUB_OUTPUT
           else
-            echo "tagCreated=false" >> $GITHUB_OUTPUT
+            echo "tagExists=false" >> $GITHUB_OUTPUT
           fi
         env:
           IMAGE: ${{ secrets.DOCKERHUB_USERNAME }}/personalfinance
@@ -50,7 +50,7 @@ jobs:
   docker:
     runs-on: ubuntu-latest
     needs: build
-    if: ${{ needs.build.outputs.tagCreated == 'true' }}
+    if: ${{ needs.build.outputs.tagExists == 'false' }}
     steps:
       - uses: actions/checkout@v4
 
