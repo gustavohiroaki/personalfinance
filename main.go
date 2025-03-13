@@ -9,11 +9,10 @@ import (
 )
 
 func main() {
-	const Version = "1.0.0"
+	const Version = "1.0.1"
 	err := godotenv.Load(".env")
-
 	if err != nil {
-		log.Fatalf("Error loading .env file")
+		log.Println("No .env file found, using system environment variables")
 	}
 
 	serverInstance := infrastructure.PrepareServer()
