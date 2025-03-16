@@ -11,10 +11,9 @@ import (
 )
 
 func TestGetTickerData(t *testing.T) {
-
 	ticker := "PETR4.SA"
 
-	mockResponse := `{"currentPrice": 100.0}`
+	mockResponse := `{"ask": 100.0}`
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("teste")
 		w.WriteHeader(http.StatusOK)
