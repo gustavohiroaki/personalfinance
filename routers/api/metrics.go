@@ -11,9 +11,11 @@ import (
 )
 
 type Position struct {
-	Quantity  float64 `json:"quantity"`
-	TotalCost float64 `json:"total_cost"`
-	Average   float64 `json:"average"`
+	Quantity   float64 `json:"quantity"`
+	TotalCost  float64 `json:"total_cost"`
+	Average    float64 `json:"average"`
+	Price      float64 `json:"price"`
+	TotalValue float64 `json:"total_value"`
 }
 
 func GetPosition(c *gin.Context) {
@@ -44,20 +46,32 @@ func GetPosition(c *gin.Context) {
 func GetPositionByAsset(c *gin.Context) {
 	var transactions []models.Transaction
 	var position Position
+	var ticker string
 	code := c.Param("id")
 
 	if err := infrastructure.DB.Where("code = ?", code).Find(&transactions).Order("date asc").Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get transactions"})
 		return
 	}
-
 	quantity, totalCost := metrics.CalculatePosition(transactions)
 	average := metrics.CalculateAveragePrice(totalCost, quantity)
-	position = Position{
-		Quantity:  quantity,
-		TotalCost: totalCost,
-		Average:   average,
+
+	switch transactions[0].Type {
+	case "AÇÃO":
+		ticker = code + ".SA"
+	case "FII":
+		ticker = code + ".SA"
+	default:
+		ticker = code
 	}
 
+	data := metrics.GetTickerData(ticker)
+	position = Position{
+		Quantity:   quantity,
+		TotalCost:  totalCost,
+		Average:    average,
+		Price:      data.CurrentPrice,
+		TotalValue: quantity * data.CurrentPrice,
+	}
 	c.JSON(http.StatusOK, gin.H{"position": position})
 }

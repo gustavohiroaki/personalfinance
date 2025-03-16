@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	const Version = "1.0.2"
+	const Version = "1.0.3"
 	err := godotenv.Load(".env")
 	if err != nil {
 		log.Println("No .env file found, using system environment variables")
