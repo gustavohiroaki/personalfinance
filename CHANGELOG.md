@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Rota de obter informações pelo ticker
+- Primeira versão do sistema com duas entidades principais, de transações e eventos corporativos.
 
 [unreleased]: https://github.com/gustavohiroaki/personalfinance/compare/v0.1.0...HEAD
 [0.1.0]: https://github.com/gustavohiroaki/personalfinance/releases/tag/v0.1.0
