@@ -6,13 +6,7 @@ import (
 )
 
 func CreateTransactions(transactions []models.Transaction) error {
-	for _, transaction := range transactions {
-		if err := models.ValidateTransaction(transaction); err != nil {
-			return err
-		}
-		transaction.Adjusted = false
-	}
-	if err := infrastructure.DB.Create(&transactions).Error; err != nil {
+	if err := models.CreateTransactions(infrastructure.DB, &transactions); err != nil {
 		return err
 	}
 
