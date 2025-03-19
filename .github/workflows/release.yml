@@ -1,4 +1,4 @@
-name: Go
+name: Release
 
 on:
   push:
@@ -43,7 +43,7 @@ jobs:
       - name: Docker tag verification
         id: tag_verification
         run: |
-          TAG_EXISTS=$(curl -s -o /dev/null -w "%{http_code}" https://hub.docker.com/v2/repositories/${{ secrets.DOCKERHUB_USERNAME }}/personalfinance/tags/${{ steps.extract_version.outputs.version }})
+          TAG_EXISTS=$(curl -s -o /dev/null -w "%{http_code}" https://hub.docker.com/v2/repositories/${{ secrets.DOCKERHUB_USERNAME }}/personalfinance/tags/v${{ steps.extract_version.outputs.version }})
           if [ "$TAG_EXISTS" -eq 200 ]; then
             echo "tagExists=true" >> $GITHUB_OUTPUT
           else
