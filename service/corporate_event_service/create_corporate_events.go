@@ -6,12 +6,7 @@ import (
 )
 
 func CreateCorporateEvents(corporateEvents []models.CorporateEvent) error {
-	for _, corporateEvent := range corporateEvents {
-		if err := models.ValidateCorporateEvent(corporateEvent); err != nil {
-			return err
-		}
-	}
-	if err := infrastructure.DB.Create(&corporateEvents).Error; err != nil {
+	if err := models.CreateCorporateEvents(infrastructure.DB, &corporateEvents); err != nil {
 		return err
 	}
 	for _, corporateEvent := range corporateEvents {
