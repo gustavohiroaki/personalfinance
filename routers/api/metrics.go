@@ -33,10 +33,14 @@ func GetPosition(c *gin.Context) {
 	for code, transactions := range groupedTransactions {
 		quantity, totalCost := metrics.CalculatePosition(transactions)
 		average := metrics.CalculateAveragePrice(totalCost, quantity)
+		tickerData := metrics.GetTickerData(code, transactions[0].Type)
+
 		positions[code] = Position{
-			Quantity:  quantity,
-			TotalCost: totalCost,
-			Average:   average,
+			Quantity:   quantity,
+			TotalCost:  totalCost,
+			Average:    average,
+			Price:      tickerData.CurrentPrice,
+			TotalValue: quantity * tickerData.CurrentPrice,
 		}
 	}
 
@@ -46,7 +50,6 @@ func GetPosition(c *gin.Context) {
 func GetPositionByAsset(c *gin.Context) {
 	var transactions []models.Transaction
 	var position Position
-	var ticker string
 	code := c.Param("id")
 
 	if err := infrastructure.DB.Where("code = ?", code).Find(&transactions).Order("date asc").Error; err != nil {
@@ -55,23 +58,13 @@ func GetPositionByAsset(c *gin.Context) {
 	}
 	quantity, totalCost := metrics.CalculatePosition(transactions)
 	average := metrics.CalculateAveragePrice(totalCost, quantity)
-
-	switch transactions[0].Type {
-	case "AÇÃO":
-		ticker = code + ".SA"
-	case "FII":
-		ticker = code + ".SA"
-	default:
-		ticker = code
-	}
-
-	data := metrics.GetTickerData(ticker)
+	tickerData := metrics.GetTickerData(transactions[0].Code, transactions[0].Type)
 	position = Position{
 		Quantity:   quantity,
 		TotalCost:  totalCost,
 		Average:    average,
-		Price:      data.CurrentPrice,
-		TotalValue: quantity * data.CurrentPrice,
+		Price:      tickerData.CurrentPrice,
+		TotalValue: quantity * tickerData.CurrentPrice,
 	}
 	c.JSON(http.StatusOK, gin.H{"position": position})
 }
