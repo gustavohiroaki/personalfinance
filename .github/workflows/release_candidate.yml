@@ -1,8 +1,10 @@
 name: Go
 
 on:
+  push:
+    branches: ["master"]
   pull_request:
-    branches-ignore: ["master"]
+    branches: ["master"]
 
 jobs:
   build:
@@ -10,6 +12,7 @@ jobs:
     outputs:
       tagExists: ${{ steps.tag_verification.outputs.tagExists }}
       version: ${{ steps.extract_version.outputs.version }}
+      containsRc: ${{ steps.contains_rc.outputs.containsRc }}
     steps:
       - uses: actions/checkout@v4
 
@@ -32,6 +35,15 @@ jobs:
           echo "VERSION=$VERSION" >> $GITHUB_ENV
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
+      - name: Contains rc
+        id: contains_rc
+        run: |
+          if [[ ${{ steps.extract_version.outputs.version }} == *"rc"* ]]; then
+            echo "containsRc=true" >> $GITHUB_OUTPUT
+          else
+            echo "containsRc=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: Docker tag verification
         id: tag_verification
         run: |
@@ -52,21 +64,26 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Create tag
+        uses: actions/github-script@v5
+        with:
+          script: |
+            if (${{ needs.build.outputs.containsRc }} === 'true') {
+              github.rest.git.createRef({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                ref: 'refs/tags/v${{ needs.build.outputs.version }}',
+                sha: context.sha
+              })
+            } else {
+              echo "Release candidate versions are not allowed in CI." >&2
+              exit 1
+            }
       - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-      - name: Create tag
-        uses: actions/github-script@v5
-        with:
-          script: |
-            github.rest.git.createRef({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              ref: 'refs/tags/v${{ needs.build.outputs.version }}',
-              sha: context.sha
-            })
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
@@ -80,3 +97,4 @@ jobs:
           push: true
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/personalfinance:v${{ needs.build.outputs.version }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/personalfinance:latest
