@@ -78,12 +78,6 @@ jobs:
               draft: false,
               prerelease: false
             })
-            github.rest.repos.createRef({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              ref: 'refs/tags/latest',
-              sha: context.sha
-            })
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
