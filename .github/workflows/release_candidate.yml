@@ -1,8 +1,8 @@
 name: Go
 
 on:
-  push:
-    branches: ["master"]
+  pull_request:
+    branches-ignore: ["master"]
 
 jobs:
   build:
@@ -18,6 +18,12 @@ jobs:
         with:
           go-version: "1.23"
 
+      - name: Build
+        run: go build -v ./...
+
+      - name: Test
+        run: go test -v ./...
+
       - name: Extract version from main.go
         id: extract_version
         run: |
@@ -25,20 +31,6 @@ jobs:
           VERSION=$(grep -oP 'const Version\s*=\s*"\K[^"]+' main.go)
           echo "VERSION=$VERSION" >> $GITHUB_ENV
           echo "version=$VERSION" >> $GITHUB_OUTPUT
-
-      - name: Contains rc
-        id: contains_rc
-        run: |
-          if [[ ${{ steps.extract_version.outputs.version }} == *"rc"* ]]; then
-          echo "Release candidate versions are not allowed in CI." >&2
-          exit 1
-          fi
-
-      - name: Build
-        run: go build -v ./...
-
-      - name: Test
-        run: go test -v ./...
 
       - name: Docker tag verification
         id: tag_verification
@@ -69,23 +61,12 @@ jobs:
         uses: actions/github-script@v5
         with:
           script: |
-            github.rest.repos.createRelease({
+            github.rest.git.createRef({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              tag_name: 'v${{ needs.build.outputs.version }}',
-              name: 'v${{ needs.build.outputs.version }}',
-              body: 'Release v${{ needs.build.outputs.version }}',
-              draft: false,
-              prerelease: false
-            })
-            github.rest.repos.createRef({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              ref: 'refs/tags/latest',
+              ref: 'refs/tags/v${{ needs.build.outputs.version }}',
               sha: context.sha
             })
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
@@ -99,4 +80,3 @@ jobs:
           push: true
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/personalfinance:v${{ needs.build.outputs.version }}
-            ${{ secrets.DOCKERHUB_USERNAME }}/personalfinance:latest

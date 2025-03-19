@@ -9,8 +9,9 @@ import (
 )
 
 func main() {
-	const Version = "1.0.3"
+	const Version = "1.0.3-rc.0"
 	err := godotenv.Load(".env")
+	log.Println("Starting Personal Finance API version ", Version)
 	if err != nil {
 		log.Println("No .env file found, using system environment variables")
 	}

@@ -6,5 +6,9 @@ import (
 )
 
 func DeleteTransaction(id string) error {
-	return infrastructure.DB.Delete(&models.Transaction{}, id).Error
+	if err := models.DeleteTransaction(infrastructure.DB, id); err != nil {
+		return err
+	}
+
+	return nil
 }

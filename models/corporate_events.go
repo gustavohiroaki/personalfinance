@@ -1,6 +1,9 @@
 package models
 
-import "github.com/go-playground/validator/v10"
+import (
+	"github.com/go-playground/validator/v10"
+	"gorm.io/gorm"
+)
 
 type CorporateEvent struct {
 	DBBase
@@ -19,4 +22,15 @@ func ValidateCorporateEvent(corporateEvent CorporateEvent) error {
 	}
 
 	return err
+}
+
+func CreateCorporateEvents(DB *gorm.DB, corporateEvents *[]CorporateEvent) error {
+	for _, corporateEvent := range *corporateEvents {
+		err := ValidateCorporateEvent(corporateEvent)
+		if err != nil {
+			return err
+		}
+	}
+
+	return DB.Create(corporateEvents).Error
 }

@@ -6,5 +6,9 @@ import (
 )
 
 func UpdateTransaction(transaction models.Transaction) error {
-	return infrastructure.DB.Save(&transaction).Error
+	if err := models.UpdateTransaction(infrastructure.DB, transaction); err != nil {
+		return err
+	}
+
+	return nil
 }
