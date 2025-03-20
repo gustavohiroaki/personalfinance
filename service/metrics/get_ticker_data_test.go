@@ -9,9 +9,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestGetBrazilianTickerData(t *testing.T) {
-	ticker := "PETR4"
-	transactionType := "AÇÃO"
+func TestGetTickerData(t *testing.T) {
+	ticker := "PETR4.SA"
 
 	mockResponse := `{"ask": 100.0}`
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -22,23 +21,6 @@ func TestGetBrazilianTickerData(t *testing.T) {
 	os.Setenv("URL_TICKER", server.URL)
 	defer server.Close()
 
-	response := GetTickerData(ticker, transactionType)
-	assert.Equal(t, 100.0, response.CurrentPrice)
-}
-
-func TestGetNonBrazilianTickerData(t *testing.T) {
-	ticker := "DIS"
-	transactionType := "STOCK"
-
-	mockResponse := `{"ask": 100.0}`
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		assert.Equal(t, r.URL.Path, "/DIS")
-		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(mockResponse))
-	}))
-	os.Setenv("URL_TICKER", server.URL)
-	defer server.Close()
-
-	response := GetTickerData(ticker, transactionType)
+	response := GetTickerData(ticker)
 	assert.Equal(t, 100.0, response.CurrentPrice)
 }

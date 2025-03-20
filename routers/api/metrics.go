@@ -11,16 +11,25 @@ import (
 	"github.com/gustavohiroaki/personalfinance/service/transaction_service"
 )
 
-func computePosition(code string, transactions []models.Transaction) models.Position {
+func computePosition(code string, transactions []models.Transaction, currency string) models.Position {
+	var getTickerResponse metrics.GetTickerResponse
 	quantity, totalCost := calculators.CalculatePosition(transactions)
+
+	if currency == "BRL" {
+		getTickerResponse = metrics.GetTickerData(code + ".SA")
+	} else {
+		getTickerResponse = metrics.GetTickerData(code)
+		currency := metrics.GetTickerData(currency + "BRL=X")
+		getTickerResponse.CurrentPrice = getTickerResponse.CurrentPrice * currency.CurrentPrice
+		totalCost = totalCost * currency.CurrentPrice
+	}
 	average := calculators.CalculateAveragePrice(totalCost, quantity)
-	tickerData := metrics.GetTickerData(code, transactions[0].Type)
 	return models.Position{
 		Quantity:   quantity,
 		TotalCost:  totalCost,
 		Average:    average,
-		Price:      tickerData.CurrentPrice,
-		TotalValue: quantity * tickerData.CurrentPrice,
+		Price:      getTickerResponse.CurrentPrice,
+		TotalValue: quantity * getTickerResponse.CurrentPrice,
 		AssetType:  transactions[0].Type,
 	}
 }
@@ -36,7 +45,8 @@ func GetPosition(c *gin.Context) {
 
 	groupedTransactions := transaction_service.GroupTransactionsByCode(transactions)
 	for code, txs := range groupedTransactions {
-		positions[code] = computePosition(code, txs)
+		currency := txs[0].Currency
+		positions[code] = computePosition(code, txs, currency)
 	}
 	generalPositions := calculators.CalculateGeneralPosition(positions)
 	c.JSON(http.StatusOK, gin.H{"positions": positions, "generalPositions": generalPositions})
@@ -51,7 +61,7 @@ func GetPositionByAsset(c *gin.Context) {
 		return
 	}
 
-	position := computePosition(transactions[0].Code, transactions)
+	position := computePosition(transactions[0].Code, transactions, transactions[0].Currency)
 
 	c.JSON(http.StatusOK, gin.H{"position": position})
 }
