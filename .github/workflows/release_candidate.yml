@@ -67,12 +67,15 @@ jobs:
           script: |
             const containsRc = "${{ needs.build.outputs.containsRc }}";
             if (containsRc === "true") {
-              github.rest.git.createRef({
+              github.rest.repos.createRelease({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                ref: `refs/tags/v${{ needs.build.outputs.version }}`,
-                sha: context.sha
-              });
+                tag_name: 'v${{ needs.build.outputs.version }}',
+                name: 'v${{ needs.build.outputs.version }}',
+                body: 'Release candidate v${{ needs.build.outputs.version }}',
+                draft: true,
+                prerelease: true
+              })
             } else {
               console.error("Release candidate versions are not allowed in CI.");
               process.exit(1);
