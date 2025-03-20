@@ -38,6 +38,5 @@ func GetTickerData(ticker string, transactionType string) Response {
 	}
 	response := Response{}
 	json.Unmarshal(body, &response)
-	println(response.CurrentPrice)
 	return response
 }
