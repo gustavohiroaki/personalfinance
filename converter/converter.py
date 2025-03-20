@@ -9,6 +9,7 @@ def convert_transaction(transaction):
         "quantity": transaction["qtd"],
         "date": datetime.fromisoformat(transaction["data"].replace("Z", "")).strftime("%Y-%m-%d"),
         "unit_price": transaction["valorUnitario"],
+        "currency": transaction["moeda"],
         "fees": {
             "settlement": abs(transaction.get("liquidacao", 0)),
             "emolument": abs(transaction.get("emolumentos", 0)),

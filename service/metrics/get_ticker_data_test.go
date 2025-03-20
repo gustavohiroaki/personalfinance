@@ -1,7 +1,6 @@
 package metrics
 
 import (
-	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -15,7 +14,7 @@ func TestGetTickerData(t *testing.T) {
 
 	mockResponse := `{"ask": 100.0}`
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		fmt.Println("teste")
+		assert.Equal(t, r.URL.Path, "/PETR4.SA")
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte(mockResponse))
 	}))
