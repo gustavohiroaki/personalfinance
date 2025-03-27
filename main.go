@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	const Version = "0.2.0-rc.0"
+	const Version = "0.2.0"
 	err := godotenv.Load(".env")
 	log.Println("Starting Personal Finance API version ", Version)
 	if err != nil {
