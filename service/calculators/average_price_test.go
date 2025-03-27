@@ -1,8 +1,7 @@
-package metrics
+package calculators
 
 import (
 	"testing"
-
 	"github.com/stretchr/testify/assert"
 )
 

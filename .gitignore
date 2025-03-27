@@ -1,6 +1,6 @@
 /.env
-/personalfinance.db
-/personalfinance.exe
+personalfinance.db
+personalfinance.exe
 /converter/transactions.json
 /converter/formatted_transactions.json
 /.vscode

@@ -14,6 +14,7 @@ type Transaction struct {
 	Quantity  float64 `json:"quantity" validate:"required"`
 	UnitPrice float64 `json:"unit_price" validate:"required"`
 	Fees      Fees    `json:"fees" validate:"required" gorm:"foreignKey:TransactionId"`
+	Currency  string  `json:"currency" validate:"required"`
 	Adjusted  bool    `json:"adjusted"`
 }
 

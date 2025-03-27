@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Adiciona na rota de métricas, informações e métricas gerais para todas as classes de ativos
+- Adiciona campo novo de Currency na tabela de transactions
+- Adiciona conversão para moeda local nas métricas
+
 ## [0.1.0] - 2025-03-19
 
 ### Added

@@ -8,24 +8,31 @@ import (
 	"os"
 )
 
-type Response struct {
+type GetTickerResponse struct {
 	CurrentPrice float64 `json:"ask"`
 }
 
-func GetTickerData(ticker string) Response {
-	url := os.Getenv("URL_TICKER")
-	if url == "" {
-		log.Fatalf("URL not found")
-	}
-
-	resp, err := http.Get(url + "/" + ticker)
+func request(url string) []byte {
+	resp, err := http.Get(url)
 
 	if err != nil {
 		log.Fatalf("Error fetching data from %s", url)
 	}
 	defer resp.Body.Close()
 	body, err := io.ReadAll(resp.Body)
-	response := Response{}
+	if err != nil {
+		log.Fatalf("Error reading body from %s", url)
+	}
+	return body
+}
+
+func GetTickerData(ticker string) GetTickerResponse {
+	url := os.Getenv("URL_TICKER")
+	if url == "" {
+		log.Fatalf("URL not found")
+	}
+	body := request(url + "/" + ticker)
+	response := GetTickerResponse{}
 	json.Unmarshal(body, &response)
 	return response
 }

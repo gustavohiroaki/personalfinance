@@ -71,6 +71,7 @@ func TestAdjustTransactionValue(t *testing.T) {
 			Brokerage:  1,
 			Iss:        1,
 		},
+		Currency: "BRL",
 		Adjusted: false,
 	}
 	transactions := make([]models.Transaction, 1)
